@@ -27,15 +27,13 @@ create or alter function dbo.split_string (
 returns table
 with schemabinding
 as return (
-    select idx = cast(j.[key] as bigint) + 1
-        ,[value] = replace(j.[value], nchar(17), @separator)
-    from openjson(
-        N'["' + replace(replace(
-            --§ Replace all instances of '\' + @separator with obscure character nchar(17)
-            string_escape(@string, 'json'), string_escape(N'\' + @separator, 'json'), string_escape(nchar(17), 'json')), 
-            --§ Replace all instances of @separator with N'","'
-            string_escape(@separator, 'json'), N'","') +
-        N'"]'
-    ) j
+    select idx = cast([key] as bigint) + 1
+        ,[value] = replace([value], nchar(17), @separator)
+    from openjson(N'["' + replace(replace(
+        --§ Replace all instances of '\' + @separator with obscure character nchar(17)
+        string_escape(@string, 'json'), string_escape(N'\' + @separator, 'json'), N'\u0011'), 
+        --§ Replace all instances of @separator with N'","'
+        string_escape(@separator, 'json'), N'","') +
+    N'"]')
 );
 go
