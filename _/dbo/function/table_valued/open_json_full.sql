@@ -22,10 +22,10 @@
 /*$ Options
     ```json
     {
-        "max_level": "(int) Maximum levels to parse. 0 means no limit. Defaults to 0."
+        "max_level": "(int) Maximum levels to parse. 0 means no limit. Defaults to 0.",
         "include_root": "(bool) If true will include root in the results. Defaults to false.",
         "include_leaves_only": "(bool) If true will only return leaf nodes. Defaults to false",
-        "include_null_values": "(bool) If true, null values will be removed from objects. Defaults to false.",
+        "include_null_values": "(bool) If true, null values will be included. Defaults to false.",
         "hide_json_values": "(bool) If true, the value column of object and array nodes will be null."
     }
     ```

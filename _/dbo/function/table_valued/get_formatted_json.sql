@@ -1,5 +1,7 @@
 /*§ Description
     Returns a formatted JSON string from JSON input.
+
+    NOTE: If you're on SQL Server version 2017 or later, replace the `stuff()` function call with `string_agg()`.
 */
 /*§ Options
     ```json
@@ -17,9 +19,9 @@ create or alter function dbo.get_formatted_json (
 returns table
 as return (
     with options as (
-        select minify = cast(isnull(json_value(@options, N'$.minify'),0) as bit)
-            ,indentation_size = cast(isnull(json_value(@options, N'$.indentation_size'),4) as tinyint)
-            ,return_as_string = cast(isnull(json_value(@options, N'$.return_as_string'),0) as bit)
+        select minify = cast(isnull(json_value(@options, N'$.minify'), 0) as bit)
+            ,indentation_size = cast(isnull(json_value(@options, N'$.indentation_size'), 4) as tinyint)
+            ,return_as_string = cast(isnull(json_value(@options, N'$.return_as_string'), 0) as bit)
     )
     ,formatter as (
         select idx = row_number() over(order by y.hid)
@@ -33,8 +35,8 @@ as return (
                     else [value]
                     end 
                 + iif(hierarchy_id = max(hierarchy_id) over(partition by hierarchy_id.GetAncestor(1)) or x.i = 0, N'', N',')
-        from dbo.open_json_full(@json_string,N'{"include_root":true}') p
-        left join (values(0),(1)) x(i)
+        from dbo.open_json_full(@json_string, N'{"include_root":true}') p
+        left join (values(0), (1)) x(i)
             on p.has_children = 1
         cross apply (
             select hid = iif(isnull(x.i, 0) = 0,
@@ -54,12 +56,11 @@ as return (
     union all
     select idx = 1
         ,[value] = stuff((
-                select iif(o.minify = 0 or f.idx = 1, nchar(13) + nchar(10), N'') + [value]
-                from formatter f
-                order by f.idx
-                for xml path(''), type
-            ).value('.', 'nvarchar(max)'), 1, 2, ''
-        ) 
+            select iif(o.minify = 0 or f.idx = 1, nchar(13) + nchar(10), N'') + [value]
+            from formatter f
+            order by f.idx
+            for xml path(''), type
+        ).value('.', 'nvarchar(max)'), 1, 2, '')
     from options o
     where o.return_as_string = 1
 );

@@ -7,6 +7,7 @@ create or alter function dbo.normalize_line_endings (
     @char nvarchar(10) = null   --§ Character(s) to replace line endings with
 )
 returns table
+with schemabinding
 as return (
     with le as (
         select cr = nchar(13)

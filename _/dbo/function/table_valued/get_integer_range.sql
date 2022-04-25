@@ -6,6 +6,7 @@ create or alter function dbo.get_integer_range (
     @end bigint     --§ Last integer in range
 )
 returns table
+with schemabinding
 as return (
     with 
         e1(n) as (select 1 union all select 1),      --2

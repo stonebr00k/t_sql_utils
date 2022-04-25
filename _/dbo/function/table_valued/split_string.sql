@@ -9,7 +9,7 @@
     NOTE! If the separator length is exactly one character and you don't need escaping or the idx-column, use built-in 
     function `string_split()` instead.
     
-    NOTE 2! In the highly unlikely event your @string contains the unicode character u0011 (nchar(17), "device control one"), 
+    NOTE 2! In the unlikely event your @string contains the unicode character u0011 (nchar(17), "device control one"), 
     this function will return your @separator instead in those places.
 */
 /*§ Usage
@@ -29,9 +29,9 @@ with schemabinding
 as return (
     select idx = cast([key] as bigint) + 1
         ,[value] = replace([value], nchar(17), @separator)
-    from openjson(N'["' + replace(replace(
-        --§ Replace all instances of '\' + @separator with obscure character nchar(17)
-        string_escape(@string, 'json'), string_escape(N'\' + @separator, 'json'), N'\u0011'), 
+    from openjson(N'["' + replace(replace(string_escape(@string, 'json'),
+        --§ Replace all instances of '\' + @separator with character nchar(17)
+        string_escape(N'\' + @separator, 'json'), N'\u0011'),
         --§ Replace all instances of @separator with N'","'
         string_escape(@separator, 'json'), N'","') +
     N'"]')

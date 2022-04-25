@@ -26,22 +26,14 @@ create or alter function dbo.prune_repeated_chars (
     @char nchar(1)          --§ Character to eliminate repetitions of
 )
 returns table
+with schemabinding
 as return (
-    with chars as (
-        select unlikely_char1 = nchar(17)
-            ,unlikely_char2 = nchar(18)
-    )
-    select [value] = replace(replace(replace(@string, 
+    select [value] = replace(replace(replace(@string,
         --§ Replace all instances of @char in @string with the combination nchar(17) + nchar(18)
-        @char, repl),
+        @char, nchar(17) + nchar(18)),
         --§ Then, remove all instances of the reverse combination nchar(18) + nchar(17)
-        del, N''),
+        nchar(18) + nchar(17), N''),
         --§ Lastly, replace all instances of the combination nchar(17) + nchar(18) with the original @char
-        repl, @char)
-    from (
-        select repl = unlikely_char1 + unlikely_char2
-            ,del = unlikely_char2 + unlikely_char1
-        from chars
-    ) x
+        nchar(17) + nchar(18), @char)
 );
 go
